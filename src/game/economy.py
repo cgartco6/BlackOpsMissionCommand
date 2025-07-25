@@ -3,7 +3,7 @@ import os
 import datetime
 import random
 import configparser
-from game.ads_manager import AdManager
+from .ads_manager import AdManager
 
 class EconomySystem:
     def __init__(self, player_id):
@@ -60,14 +60,16 @@ class EconomySystem:
         if self.data.get('subscription_level', 0) > 0:
             return False
             
-        # If they've never watched a set or it's been more than 1 minute since last set
+        # Check time between ad sets
         last_set_time = self.data.get('last_ad_set_time')
+        min_interval = int(self.config.get('ADS', 'MIN_TIME_BETWEEN_SETS', fallback="60"))
+        
         if not last_set_time:
             return True
             
         try:
             last_set = datetime.datetime.fromisoformat(last_set_time)
-            return (datetime.datetime.now() - last_set).total_seconds() > 60
+            return (datetime.datetime.now() - last_set).total_seconds() > min_interval
         except:
             return True
     
@@ -80,8 +82,7 @@ class EconomySystem:
         total_revenue = 0
         for i in range(3):
             # Generate high-value ad impression ($100-$2200 eCPM)
-            cpm = random.randint(100, 2200)
-            ad_revenue = cpm / 1000  # Convert CPM to per-impression value
+            ad_revenue = self.ad_manager.show_ad()
             total_revenue += ad_revenue
             
             # Track ad metrics
@@ -110,6 +111,7 @@ class EconomySystem:
         }
         
         # Append to transaction log
+        os.makedirs("data/transaction_logs", exist_ok=True)
         with open("data/transaction_logs/revenue.csv", "a") as f:
             f.write(f"{transaction['timestamp']},{transaction['player_id']},{transaction['source']},{transaction['amount']},{transaction.get('ad_index','')}\n")
         
