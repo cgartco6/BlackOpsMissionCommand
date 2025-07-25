@@ -1,4 +1,23 @@
+import pygame
 import random
+
+# Colors (defined here for Character class)
+BACKGROUND = (15, 25, 45)
+ACCENT = (0, 150, 200)
+WHITE = (240, 240, 240)
+DARK_GRAY = (40, 40, 40)
+LIGHT_GRAY = (100, 100, 100)
+HEALTH_GREEN = (50, 200, 80)
+HEALTH_RED = (200, 50, 50)
+LIGHT_BLUE = (100, 180, 255)
+YELLOW = (255, 215, 0)
+
+# Fonts
+title_font = pygame.font.SysFont("Arial", 48, bold=True)
+heading_font = pygame.font.SysFont("Arial", 36, bold=True)
+subtitle_font = pygame.font.SysFont("Arial", 28, bold=True)
+normal_font = pygame.font.SysFont("Arial", 24)
+small_font = pygame.font.SysFont("Arial", 20)
 
 class Character:
     def __init__(self, name, role, health, attack, defense, special_name, special_desc, image_color):
@@ -16,6 +35,7 @@ class Character:
         self.selected = False
         self.special_cooldown = 0
         self.alive = True
+        self.player_value_score = random.uniform(0.3, 0.9)  # For ad targeting
         
     def draw(self, surface, x, y, size=80):
         self.x, self.y = x, y
