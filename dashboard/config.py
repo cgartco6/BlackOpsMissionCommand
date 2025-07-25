@@ -1,31 +1,11 @@
 # dashboard/config.py
 
 # Display settings
-SCREEN_WIDTH = 1200
-SCREEN_HEIGHT = 800
-TILE_SIZE = 32
-UI_HEIGHT = 100
-
-# Game settings
+SCREEN_WIDTH = 1600
+SCREEN_HEIGHT = 900
 FPS = 60
-GAME_TITLE = "BlackOpsMissionCommand - Tactical Dashboard"
-
-# Vision system settings
-SIGHT_RANGE = 8
-FOW_UNEXPLORED = (30, 30, 40, 240)
-FOW_EXPLORED = (60, 60, 80, 200)
+GAME_TITLE = "BlackOpsMissionCommand - Analytics Dashboard"
 
 # Colors
-BACKGROUND = (40, 40, 50)
-GROUND = (50, 60, 40)
-OBSTACLE = (80, 70, 60)
-PLAYER_COLOR = (0, 255, 0)
-ENEMY_COLOR = (255, 50, 50)
-UI_BG = (30, 30, 45, 220)
 TEXT_COLOR = (220, 220, 255)
-GRID_COLOR = (70, 70, 90, 100)
-
-# Map settings
-MAP_WIDTH = SCREEN_WIDTH // TILE_SIZE
-MAP_HEIGHT = (SCREEN_HEIGHT - UI_HEIGHT) // TILE_SIZE
-OBSTACLE_DENSITY = 0.25
+UI_BG = (30, 35, 45)
