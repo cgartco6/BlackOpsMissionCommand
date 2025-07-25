@@ -1,6 +1,20 @@
 import pygame
-from game.enemies import Enemy
-from game.ui import *
+import random
+from .enemies import Enemy
+
+# Colors
+ACCENT = (0, 150, 200)
+WHITE = (240, 240, 240)
+DARK_GRAY = (40, 40, 40)
+LIGHT_GRAY = (100, 100, 100)
+GREEN_ACCENT = (50, 200, 100)
+YELLOW = (255, 215, 0)
+LIGHT_BLUE = (100, 180, 255)
+
+# Fonts
+subtitle_font = pygame.font.SysFont("Arial", 28, bold=True)
+normal_font = pygame.font.SysFont("Arial", 24)
+small_font = pygame.font.SysFont("Arial", 20)
 
 class Mission:
     def __init__(self, title, description, location, difficulty, enemies):
