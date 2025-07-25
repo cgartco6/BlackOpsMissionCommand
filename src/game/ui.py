@@ -1,9 +1,13 @@
 import pygame
 import math
-from game.characters import *
-from game.missions import *
+import os
+from .characters import Character, create_team
+from .missions import Mission, create_missions
 
-# Colors (defined here for UI elements)
+# Screen dimensions
+SCREEN_WIDTH, SCREEN_HEIGHT = 1000, 700
+
+# Colors
 BACKGROUND = (15, 25, 45)
 ACCENT = (0, 150, 200)
 RED_ACCENT = (200, 50, 50)
@@ -50,13 +54,18 @@ class Button:
                 return True
         return False
 
-def draw_mission_select_screen(surface, team, missions, current_mission, start_mission_button, mouse_pos):
+def draw_mission_select_screen(surface, team, missions, current_mission, 
+                              start_mission_button, ad_button, mouse_pos, economy):
     # Title
     title_text = title_font.render("BLACK OPS: MISSION COMMAND", True, ACCENT)
     surface.blit(title_text, (SCREEN_WIDTH//2 - title_text.get_width()//2, 30))
     
     subtitle = subtitle_font.render("Select a Mission", True, LIGHT_BLUE)
     surface.blit(subtitle, (SCREEN_WIDTH//2 - subtitle.get_width()//2, 90))
+    
+    # Player info
+    player_info = small_font.render(f"Player: {os.environ.get('GAME_PLAYER_ID', 'default')} | Tokens: {economy.data['tokens']}", True, YELLOW)
+    surface.blit(player_info, (SCREEN_WIDTH - player_info.get_width() - 20, 20))
     
     # Draw team
     team_text = subtitle_font.render("Your Team", True, WHITE)
@@ -80,6 +89,10 @@ def draw_mission_select_screen(surface, team, missions, current_mission, start_m
     # Draw start mission button
     start_mission_button.check_hover(mouse_pos)
     start_mission_button.draw(surface)
+    
+    # Draw ad button
+    ad_button.check_hover(mouse_pos)
+    ad_button.draw(surface)
 
 def draw_combat_screen(surface, mission, team, selected_character, combat_log, player_turn, 
                       attack_button, special_button, back_button, mouse_pos):
@@ -197,5 +210,31 @@ def draw_victory_screen(surface, main_menu_button, mouse_pos):
     main_menu_button.check_hover(mouse_pos)
     main_menu_button.draw(surface)
 
-# Screen dimensions (define here for UI)
-SCREEN_WIDTH, SCREEN_HEIGHT = 1000, 700
+def draw_ad_opportunity_screen(surface, tokens_available, ad_sets_completed):
+    """Screen shown when player can watch ads for tokens"""
+    surface.fill((10, 20, 35))
+    
+    title = title_font.render("EARN MORE TOKENS", True, YELLOW)
+    surface.blit(title, (SCREEN_WIDTH//2 - title.get_width()//2, 100))
+    
+    # Explanation
+    explanation = [
+        "Watch 3 short ads to earn 3 game tokens",
+        "Each ad generates high-value revenue ($100-$2200 eCPM)",
+        "You can do this as many times as you want!",
+        "",
+        f"Ad sets completed: {ad_sets_completed}",
+        f"Current tokens: {tokens_available}"
+    ]
+    
+    for i, line in enumerate(explanation):
+        text = normal_font.render(line, True, LIGHT_BLUE)
+        surface.blit(text, (SCREEN_WIDTH//2 - text.get_width()//2, 200 + i*40))
+    
+    # Draw watch ads button
+    watch_btn = Button(SCREEN_WIDTH//2 - 150, 500, 300, 60, "WATCH 3 ADS FOR 3 TOKENS", ACCENT)
+    
+    # Draw back button
+    back_btn = Button(50, SCREEN_HEIGHT - 70, 120, 40, "BACK")
+    
+    return watch_btn, back_btn
