@@ -1,5 +1,15 @@
 import pygame
-from game.ui import *
+import random
+
+# Colors
+WHITE = (240, 240, 240)
+HEALTH_GREEN = (50, 200, 80)
+HEALTH_RED = (200, 50, 50)
+LIGHT_BLUE = (100, 180, 255)
+
+# Fonts
+heading_font = pygame.font.SysFont("Arial", 36, bold=True)
+small_font = pygame.font.SysFont("Arial", 20)
 
 class Enemy:
     def __init__(self, name, health, attack, defense, image_color):
