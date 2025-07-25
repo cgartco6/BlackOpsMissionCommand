@@ -6,7 +6,9 @@ from game.missions import create_missions
 from game.ui import Button
 from game.combat import handle_combat_events, enemy_turn
 from game.particles import update_particles
-from game.ui import draw_mission_select_screen, draw_combat_screen, draw_mission_complete_screen, draw_game_over_screen, draw_victory_screen
+from game.ui import draw_mission_select_screen, draw_combat_screen, draw_mission_complete_screen, draw_game_over_screen, draw_victory_screen, draw_ad_opportunity_screen
+from game.economy import EconomySystem
+from game.ai_agents.agent_orchestrator import AIOrchestrator
 
 # Initialize pygame
 pygame.init()
@@ -54,7 +56,7 @@ def main():
     
     # Initialize game state
     current_mission = 0
-    game_state = "mission_select"  # mission_select, combat, mission_complete, game_over
+    game_state = "mission_select"  # mission_select, combat, mission_complete, game_over, ad_opportunity
     selected_character = None
     combat_log = []
     player_turn = True
@@ -62,6 +64,10 @@ def main():
     
     # Unlock first mission
     missions[0].unlocked = True
+    
+    # Initialize player economy
+    player_id = os.environ.get('GAME_PLAYER_ID', 'default')
+    economy = EconomySystem(player_id)
     
     # Create buttons
     start_mission_button = Button(SCREEN_WIDTH//2 - 100, SCREEN_HEIGHT - 100, 200, 50, "START MISSION")
@@ -71,6 +77,8 @@ def main():
     attack_button = Button(SCREEN_WIDTH//2 - 220, SCREEN_HEIGHT - 90, 200, 50, "ATTACK")
     special_button = Button(SCREEN_WIDTH//2 + 20, SCREEN_HEIGHT - 90, 200, 50, "SPECIAL")
     back_button = Button(50, SCREEN_HEIGHT - 70, 120, 40, "BACK")
+    ad_button = Button(SCREEN_WIDTH - 200, SCREEN_HEIGHT - 70, 180, 40, "EARN TOKENS")
+    watch_ads_button = Button(SCREEN_WIDTH//2 - 150, 500, 300, 60, "WATCH 3 ADS FOR 3 TOKENS")
     
     # Main game loop
     clock = pygame.time.Clock()
@@ -87,10 +95,17 @@ def main():
             # Handle button clicks
             if game_state == "mission_select":
                 if start_mission_button.handle_event(event):
-                    combat_log = start_combat(missions, current_mission, team)
-                    game_state = "combat"
-                    player_turn = True
-                    selected_character = None
+                    if economy.can_play():
+                        economy.use_token()
+                        combat_log = start_combat(missions, current_mission, team)
+                        game_state = "combat"
+                        player_turn = True
+                        selected_character = None
+                    else:
+                        game_state = "ad_opportunity"
+                
+                if ad_button.handle_event(event):
+                    game_state = "ad_opportunity"
                     
             elif game_state == "mission_complete":
                 if next_mission_button.handle_event(event):
@@ -109,6 +124,14 @@ def main():
                 if result:
                     selected_character, player_turn = result
                 
+            elif game_state == "ad_opportunity":
+                if watch_ads_button.handle_event(event):
+                    if economy.watch_ad_set():
+                        game_state = "mission_select"
+                
+                if back_button.handle_event(event):
+                    game_state = "mission_select"
+            
             # Back button handling
             if back_button.handle_event(event):
                 if game_state == "combat":
@@ -117,10 +140,14 @@ def main():
             # Handle retry and main menu buttons
             if game_state == "game_over":
                 if retry_button.handle_event(event):
-                    combat_log = start_combat(missions, current_mission, team)
-                    game_state = "combat"
-                    player_turn = True
-                    selected_character = None
+                    if economy.can_play():
+                        economy.use_token()
+                        combat_log = start_combat(missions, current_mission, team)
+                        game_state = "combat"
+                        player_turn = True
+                        selected_character = None
+                    else:
+                        game_state = "ad_opportunity"
                 if main_menu_button.handle_event(event):
                     game_state = "mission_select"
                     
@@ -166,7 +193,7 @@ def main():
         if game_state == "mission_select":
             draw_mission_select_screen(
                 screen, team, missions, current_mission, 
-                start_mission_button, mouse_pos
+                start_mission_button, ad_button, mouse_pos, economy
             )
             
         elif game_state == "combat":
@@ -193,6 +220,16 @@ def main():
                 screen, main_menu_button, 
                 mouse_pos
             )
+            
+        elif game_state == "ad_opportunity":
+            watch_btn, back_btn = draw_ad_opportunity_screen(
+                screen, economy.data['tokens'],
+                economy.data.get('ad_sets_completed', 0)
+            )
+            watch_ads_button.check_hover(mouse_pos)
+            back_button.check_hover(mouse_pos)
+            watch_ads_button.draw(screen)
+            back_button.draw(screen)
         
         pygame.display.flip()
         clock.tick(60)
