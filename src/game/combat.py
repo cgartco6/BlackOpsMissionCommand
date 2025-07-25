@@ -1,7 +1,7 @@
 import pygame
 import math
 import random
-from game.particles import Particle
+from .particles import Particle
 
 def handle_combat_events(event, mouse_pos, team, enemies, selected_character, player_turn, combat_log, particles):
     if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
